@@ -5,7 +5,48 @@
     pageEncoding="UTF-8"%>
     
 <%
-	List<BoardDto> list=BoardDao.getInstance().selectAll();//
+	//기본 페이지 번호 1로 설정
+	int pageNum=1;
+	//페이지 번호 읽어오기
+	String strPageNum=request.getParameter("pageNum");
+	//전달되는 페이지 번호 있다면
+	if(strPageNum != null){
+		//해당 페이지 번호를 숫자로 변경해서 사용한다.
+		pageNum=Integer.parseInt(strPageNum);
+	}
+		
+	//한 페이지에 몇개씩 표시할 건지
+	final int PAGE_ROW_COUNT=5;
+	
+	//하단 페이지를 몇개 표시할건지
+	final int PAGE_DISPLAY_COUNT=5;
+
+	//보여줄 페이지의 시작 ROWNUM
+	int startRowNum=1+(pageNum-1)*PAGE_ROW_COUNT; //공차수열
+	//보여줄 페이지의 끝 ROWNUM
+	int endRowNum=pageNum*PAGE_ROW_COUNT; //등비수열
+	
+	//하단 시작 페이지 번호 (소수점이 버려진 정수)를 이용
+	int startPageNum = 1+ ((pageNum-1)/PAGE_DISPLAY_COUNT)*PAGE_DISPLAY_COUNT;
+	//하단 끝 페이지 번호
+	int endPageNum = startPageNum+PAGE_DISPLAY_COUNT-1;
+	//전체 글의 갯수
+	int totalRow=BoardDao.getInstance().getCount();
+	//전체 페이지 갯수
+	int totalPageCount=(int)Math.ceil(totalRow/(double)PAGE_ROW_COUNT);
+	//끝 페이지 번호가 이미 전체 페이지 갯수보다 크게 계산되었다면 잘못된 값이다.
+	if(endPageNum > totalPageCount){
+		endPageNum=totalPageCount; //보정
+	}
+	
+	//dto에 select할 row의 정보 담기
+	BoardDto dto=new BoardDto();
+	dto.setStartRowNum(startRowNum);
+	dto.setEndRowNum(endRowNum);
+	
+	//해당 row만 select
+	List<BoardDto> list=BoardDao.getInstance().selectPage(dto);
+	
 %>    
     
     
@@ -14,6 +55,27 @@
 <head>
 <meta charset="UTF-8">
 <title>/board/list.jsp</title>
+<style>
+	ul a{
+		text-decoration: none;
+		color: grey;
+	}
+	
+	/* ul요소이면서 클래스 속성이 pagination인 */
+	ul.my-pagination{
+		list-style-type: none; /* ul의 disc 없애기 */
+		padding-left: 0; /* 왼쪽 padding 제거 */
+		display: flex; /* 자식 요소(li)를 flex 레이아웃으로 배치하기 위해(가로배치) */
+		gap: 10px; /* 자식요소끼리 공간 부여 */
+		justify-content: center; /* 가로로 배치된 상태에서 가운데 정렬 */
+	}
+	
+	.active{
+		font-weight: bold;
+		color: green;
+		text-decoration: underline;
+	}
+</style>
 <jsp:include page="/WEB-INF/include/resource.jsp"></jsp:include>
 </head>
 <body>
@@ -21,7 +83,7 @@
 		<jsp:param value="board" name="thisPage"/>	
 	</jsp:include>
 	<div class="container pt-5 pt-">
-		<a class="btn btn-outline-primary btn-sm" href="new-form.jsp">
+		<a class="btn btn-outline-primary btn-sm  mb-3" href="new-form.jsp">
 			새글 작성
 			<i class="bi bi-pencil-square"></i>
 		</a>
@@ -56,6 +118,27 @@
 				
 			</tbody>
 		</table>
+		
+		<ul class="my-pagination">
+			<%-- startPageNum 이 1이 아닐때 이전 page 가 존재하기 때문에... --%>
+			<%if(startPageNum != 1){ %>
+				<li>
+					<a href="list.jsp?pageNum=<%=startPageNum-1 %>">&lsaquo;</a>
+				</li>
+			<%} %>			
+			<%for(int i=startPageNum; i<=endPageNum ; i++){ %>
+				<li>
+					<a class="<%= i==pageNum ? "active":"" %>" href="list.jsp?pageNum=<%=i %>"><%=i %></a>
+				</li>
+			<%} %>
+			<%-- endPageNum 이 totalPageCount 보다 작을때 다음 page 가 있다 --%>		
+			<%if(endPageNum < totalPageCount){ %>
+				<li>
+					<a href="list.jsp?pageNum=<%=endPageNum+1 %>">&rsaquo;</a>
+				</li>
+			<%} %>	
+		</ul>
+		
 	</div>
 	<jsp:include page="/WEB-INF/include/footer.jsp"></jsp:include>
 </body>

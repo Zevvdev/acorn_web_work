@@ -10,6 +10,10 @@
 	BoardDto dto=BoardDao.getInstance().getByNum(num);
 	//로그인된 userName (null일 수도)
 	String userName=(String)session.getAttribute("userName");
+	//만일 본인 글 자세히 보기가 아니면 조회수 1을 증가시킨다.
+	if(!dto.getWriter().equals(userName)){
+		BoardDao.getInstance().addViewCount(num);
+	}
 	
 
 %>
@@ -35,6 +39,16 @@
 			 </ol>
 		</nav>	
 		<h1>게시물 상세보기</h1>
+		<div class="btn-group mb-2">
+			<a class="btn btn-outline-secondary btn-sm <%= dto.getPrevNum()==0? "disabled" : "" %>" href="view.jsp?num=<%=dto.getPrevNum() %>">
+				<i class="bi bi-arrow-left"></i>
+				Prev
+			</a>
+			<a class="btn btn-outline-secondary btn-sm" <%=dto.getNextNum()==0? "disabled" : "" %> href="view.jsp?num=<%=dto.getNextNum() %>">
+				<i class="bi bi-arrow-right"></i>
+				Next
+			</a>
+		</div>
 		<table class="table table-striped">
 			<colgroup>
 				<col class="col-2" />
@@ -46,7 +60,15 @@
 			</tr>
 			<tr>
 				<th>작성자</th>
-				<th><%=dto.getWriter() %></th>
+				<th>
+					<%if(dto.getProfileImage() == null){ %>
+						<i style="font-size:100px;" class="bi bi-person-circle"></i>
+					<%}else{ %>
+						<img src="${pageContext.request.contextPath }/upload/<%=dto.getProfileImage() %>" 
+							style="width:100px;height:100px;border-radius:50%;"/>
+					<%} %>
+					<%=dto.getWriter() %>
+				</th>
 			</tr>
 			<tr>
 				<th>제목</th>
@@ -55,6 +77,10 @@
 			<tr>
 				<th>조회수</th>
 				<td><%=dto.getViewCount() %></td>
+			</tr>
+			<tr>
+				<th>작성일</th>
+				<td><%=dto.getCreatedAt() %></td>
 			</tr>
 		</table>
 		<%--
