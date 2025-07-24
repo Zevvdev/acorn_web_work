@@ -57,12 +57,12 @@
 				<a href="<%=url%>">확인</a>
 				<a href="${pageContext.request.contextPath }/">인덱스 페이지로</a>
 			</p>
-		
+		 
 		
 		<%}else{ %>
 			<p>
 				아이디 혹은 비밀번호가 틀렸습니다..
-				<a href="loginform.jsp?url=<&=encodedUrl %>">다시 로그인하기</a>
+				<a href="loginform.jsp?url=<%=encodedUrl %>">다시 로그인하기</a>
 			
 			</p>
 		<%} %>

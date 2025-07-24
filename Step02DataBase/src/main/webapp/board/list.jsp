@@ -1,3 +1,4 @@
+<%@page import="org.apache.tomcat.jakartaee.commons.lang3.StringUtils"%>
 <%@page import="test.dao.BoardDao"%>
 <%@page import="java.util.List"%>
 <%@page import="test.dto.BoardDto"%>
@@ -5,6 +6,13 @@
     pageEncoding="UTF-8"%>
     
 <%
+	//검색 keyword가 있는지 읽어와보기
+	String keyword=request.getParameter("keyword");
+	System.out.println(keyword); //null or "" 또는 "검색어"
+	
+	if(keyword==null){
+		keyword="";
+	}
 	//기본 페이지 번호 1로 설정
 	int pageNum=1;
 	//페이지 번호 읽어오기
@@ -16,7 +24,7 @@
 	}
 		
 	//한 페이지에 몇개씩 표시할 건지
-	final int PAGE_ROW_COUNT=5;
+	final int PAGE_ROW_COUNT=3;
 	
 	//하단 페이지를 몇개 표시할건지
 	final int PAGE_DISPLAY_COUNT=5;
@@ -30,8 +38,22 @@
 	int startPageNum = 1+ ((pageNum-1)/PAGE_DISPLAY_COUNT)*PAGE_DISPLAY_COUNT;
 	//하단 끝 페이지 번호
 	int endPageNum = startPageNum+PAGE_DISPLAY_COUNT-1;
+
+	/*
+		StringUtils 클래스의 isEmpty() static 메소드를 이용하면 문자열이 비었는지 여부 알 수 있음
+		null 또는 "" 빈 문자열은 비었다고 판정됨
+		
+		StringUtils.isEmpty(keyword) 는
+		keyword == null or "".equals(keyword)
+		를 대체할 수 있다
+	*/
 	//전체 글의 갯수
-	int totalRow=BoardDao.getInstance().getCount();
+	int totalRow=0;
+	if(StringUtils.isEmpty(keyword)){
+		totalRow=BoardDao.getInstance().getCount();
+	}else{
+		totalRow=BoardDao.getInstance().getCountByKeyword(keyword);
+	};
 	//전체 페이지 갯수
 	int totalPageCount=(int)Math.ceil(totalRow/(double)PAGE_ROW_COUNT);
 	//끝 페이지 번호가 이미 전체 페이지 갯수보다 크게 계산되었다면 잘못된 값이다.
@@ -43,9 +65,15 @@
 	BoardDto dto=new BoardDto();
 	dto.setStartRowNum(startRowNum);
 	dto.setEndRowNum(endRowNum);
-	
-	//해당 row만 select
-	List<BoardDto> list=BoardDao.getInstance().selectPage(dto);
+	//글목록
+	List<BoardDto> list=null;
+	//만일 keyword 없으면
+	if(StringUtils.isEmpty(keyword)){
+		list=BoardDao.getInstance().selectPage(dto);
+	}else{
+		dto.setKeyword(keyword);
+		list=BoardDao.getInstance().selectPageByKeyword(dto);
+	}
 	
 %>    
     
@@ -88,6 +116,18 @@
 			<i class="bi bi-pencil-square"></i>
 		</a>
 		<h1>게시글 목록입니다.</h1>
+		<div class="row my-3">
+			<!--  4/12인 칼럼 만들고 margin-start:auto로 왼쪽 마진 자동부여 -->
+			<div class="col-lg-4 col-md-6 ms-auto">
+				<form action="list.jsp" method="get">
+					<div class="input-group">
+						<input value="<%=StringUtils.isEmpty(keyword)? "":keyword %>" type="text" name="keyword" class="form-control" placeholder="검색어 입력.." />
+						<button type="submit" class="btn btn-outline-secondary">검색</button>
+					</div>
+				</form>
+				
+			</div>		
+		</div>
 		<table class="table table bordered">
 			<thead>
 				<tr>
@@ -119,22 +159,22 @@
 			</tbody>
 		</table>
 		
-		<ul class="my-pagination">
+		<ul class="pagination">
 			<%-- startPageNum 이 1이 아닐때 이전 page 가 존재하기 때문에... --%>
 			<%if(startPageNum != 1){ %>
 				<li>
-					<a href="list.jsp?pageNum=<%=startPageNum-1 %>">&lsaquo;</a>
+					<a class="page-link" href="list.jsp?pageNum=<%=startPageNum-1 %>&keyword=<%=keyword %>">&lsaquo;</a>
 				</li>
 			<%} %>			
 			<%for(int i=startPageNum; i<=endPageNum ; i++){ %>
 				<li>
-					<a class="<%= i==pageNum ? "active":"" %>" href="list.jsp?pageNum=<%=i %>"><%=i %></a>
+					<a class="page-link <%= i==pageNum ? "active":"" %>" href="list.jsp?pageNum=<%=i %>&keyword=<%=keyword %>"><%=i %></a>
 				</li>
 			<%} %>
 			<%-- endPageNum 이 totalPageCount 보다 작을때 다음 page 가 있다 --%>		
 			<%if(endPageNum < totalPageCount){ %>
 				<li>
-					<a href="list.jsp?pageNum=<%=endPageNum+1 %>">&rsaquo;</a>
+					<a class="page-link" href="list.jsp?pageNum=<%=endPageNum+1 %>&keyword=<%=keyword %>">&rsaquo;</a>
 				</li>
 			<%} %>	
 		</ul>

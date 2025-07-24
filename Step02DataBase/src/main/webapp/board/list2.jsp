@@ -113,7 +113,7 @@
 			</tbody>
 		</table>
 		
-		<ul class="pagination">
+		<ul class="my-pagination">
 			<%-- startPageNum 이 1이 아닐때 이전 page 가 존재하기 때문에... --%>
 			<%if(startPageNum != 1){ %>
 				<li class="page-item">
@@ -136,7 +136,3 @@
 	</div>
 </body>
 </html>
-
-
-
-
