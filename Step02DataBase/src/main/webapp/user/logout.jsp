@@ -6,6 +6,10 @@
 	//"userName" 이라는 키값으로 저장된 값 삭제
 	session.removeAttribute("userName");
 	
+	// 세션영역에 저장된 모든 정보 삭제
+	session.invalidate();
+	
+	
 	//응답
 %>    
     

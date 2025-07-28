@@ -59,7 +59,8 @@ public class SecurityFilter implements Filter{
 		
 		//로그인 여부 확인
 		String userName=(String)session.getAttribute("userName");
-		//만일 로그인을 하지 않았다면 
+		//role 정보
+		String role=(String)session.getAttribute("role");
 			
 		//만일 로그인을 하지 않았다면 
 		if(userName == null) {
@@ -73,10 +74,20 @@ public class SecurityFilter implements Filter{
 	        res.sendRedirect(req.getContextPath() + "/user/loginform.jsp?url=" + encodedUrl); 
 			return; //메소드를 여기서 끝내기
 		}
-	
+		
+		//권한 체크
+		//만일 isAuthorized() 메소드가 false를 리턴하다면(접근 불가하다고 판정된다면)_
+		if(!isAuthorized(path, role)) {
+			//금지된 요청이라고 응답하고
+			res.sendError(HttpServletResponse.SC_FORBIDDEN, "접근 권한이 없습니다.");
+			return;
+		}
+		
 		chain.doFilter(request, response);
 		
 	}
+	
+		
 	
 	//화이트리스트 검사
 	private boolean isWhiteList(String path) {
@@ -89,4 +100,19 @@ public class SecurityFilter implements Filter{
 		}
 		return false;
 	}
+	
+    // 역할 기반 권한 검사
+	// 클라이언트의 요청경로와 role 정보를 넣어서 접근 가능한지 여부를 리턴하는 메소드
+    private boolean isAuthorized(String path, String role) {
+        if ("ROLE_ADMIN".equals(role)) {
+            return true; // 모든 경로 접근 허용
+        } else if ("ROLE_STAFF".equals(role)) {
+        	// "/admin/"하위 경로를 제외한 모든 경로 접근 허용
+            return !path.startsWith("/admin/");
+        } else if ("ROLE_USER".equals(role)) {
+        	// "/admin/"하위와 "/staff/" 경로를 제외한 모든 경로 접근 허용
+            return !path.startsWith("/admin/") && !path.startsWith("/staff/");
+        }
+        return false; // unknown role
+    }
 }

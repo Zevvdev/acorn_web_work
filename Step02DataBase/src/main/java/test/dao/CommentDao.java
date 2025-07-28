@@ -21,6 +21,84 @@ public class CommentDao {
 		return dao;
 	}
 	
+	//댓글 삭제 메소드 deleted => yes
+	public boolean delete(int num) {
+		Connection conn = null;
+		PreparedStatement pstmt = null;
+		//변화된 row 의 갯수를 담을 변수 선언하고 0으로 초기화
+		int rowCount = 0;
+		try {
+			conn = new DbcpBean().getConn();
+			String sql = """
+					UPDATE comments
+					SET deleted='yes'
+					WHERE num=? 
+					""";
+			pstmt = conn.prepareStatement(sql);
+			// ? 에 순서대로 필요한 값 바인딩
+			pstmt.setInt(1, num);
+			// sql 문 실행하고 변화된(추가된, 수정된, 삭제된) row 의 갯수 리턴받기
+			rowCount = pstmt.executeUpdate();
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			try {
+				if (pstmt != null)
+					pstmt.close();
+				if (conn != null)
+					conn.close();
+			} catch (Exception e) {
+			}
+		}
+
+		//변화된 rowCount 값을 조사해서 작업의 성공 여부를 알아 낼수 있다.
+		if (rowCount > 0) {
+			return true; //작업 성공이라는 의미에서 true 리턴하기
+		} else {
+			return false; //작업 실패라는 의미에서 false 리턴하기
+		}
+	}
+	
+	//댓글을 수정하는 메소드
+	public boolean update(CommentDto dto) {
+		Connection conn = null;
+		PreparedStatement pstmt = null;
+		//변화된 row 의 갯수를 담을 변수 선언하고 0으로 초기화
+		int rowCount = 0;
+		try {
+			conn = new DbcpBean().getConn();
+			String sql = """
+					UPDATE comments
+					SET content=?
+					WHERE num=?
+					""";
+			pstmt = conn.prepareStatement(sql);
+			// ? 에 순서대로 필요한 값 바인딩
+			pstmt.setString(1, dto.getContent());
+			pstmt.setInt(2, dto.getNum());
+			// sql 문 실행하고 변화된(추가된, 수정된, 삭제된) row 의 갯수 리턴받기
+			rowCount = pstmt.executeUpdate();
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			try {
+				if (pstmt != null)
+					pstmt.close();
+				if (conn != null)
+					conn.close();
+			} catch (Exception e) {
+			}
+		}
+
+		//변화된 rowCount 값을 조사해서 작업의 성공 여부를 알아 낼수 있다.
+		if (rowCount > 0) {
+			return true; //작업 성공이라는 의미에서 true 리턴하기
+		} else {
+			return false; //작업 실패라는 의미에서 false 리턴하기
+		}
+		
+	}
+	
 	//원글(parentNum)에 달린 모든 댓글을 리턴하는 메소드
 	public List<CommentDto> selectList(int parentNum){
 		List<CommentDto> list=new ArrayList<CommentDto>();

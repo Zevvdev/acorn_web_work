@@ -23,6 +23,8 @@
 		<h1>인덱스 페이지</h1>
 		<ul>
 			<li><a href="${pageContext.request.contextPath }/board/list.jsp">게시글 목록</a></li>	
+			<li><a href="${pageContext.request.contextPath }/admin/index.jsp">관리자</a></li>	
+			<li><a href="${pageContext.request.contextPath }/staff/index.jsp">직원</a></li>	
 		</ul>
 		<div id="carouselExampleIndicators" class="carousel slide" data-bs-ride="carousel">
 		  <div class="carousel-indicators">
