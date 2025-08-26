@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="book">
+	<!-- @Alias bookDto 설정됨 -->
+	<select id="selectAll" resultType="bookDto">
+		SELECT num, title, author, publisher
+		FROM book
+		ORDER BY num ASC
+	</select>
+	
+	<delete id="delete" parameterType="int">
+		DELETE FROM book
+		WHERE num=#{num}
+	</delete>
+
+	<update id="update" parameterType="bookDto">
+		UPDATE book
+		SET title=#{title}, author=#{author}, publisher=#{publisher}
+		WHERE num=#{num}
+	</update>
+	
+	<!-- 
+		이 xml 문서의 namespace : book
+		실행할 sql 문의 id : insert
+		parameter 로 전달되는 데이터의 type : BookDto
+		#{name} : BookDto 객체의 getName() 메소드를 호출해서 리턴되는 값을 해당 위치에 바인딩해 준다.
+		따라서 num, title, author, publisher 는 dto 객체의 필드명과 일치 시켜야 한다 
+		
+		selectKey 를 이용하면 insert 전에 pk 값을 미리 얻어내서 BookDto 객체에 담을수 있다.
+		keyProperty="num" 여기에서 num 과 BookDto 의 필드명과 일치하면 된다.
+	 -->
+	<insert id="insert" parameterType="bookDto">
+		<selectKey keyProperty="num" resultType="int" order="BEFORE">
+			SELECT member_seq.NEXTVAL FROM book
+		</selectKey>
+		INSERT INTO book
+		(num, title, author, publisher)
+		VALUES(#{num}, #{title}, #{author}, #{publisher})
+	</insert>
+</mapper>

@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>/gallery/upload.html</title>
+</head>
+<body>
+	<div class="container">
+		<h1>이미지 업로드 결과</h1>
+		<p>
+			설명 : <strong th:text="${caption}"></strong>
+		</p>
+		<p>
+			저장 파일명 : <strong th:text="${saveFileName}"></strong>
+		</p>
+		<img th:src="@{'/upload/'+${saveFileName}}"/>
+		<img th:src="@{/uplode/{fileName(fileName=${saveFileName})}" />
+		<!-- <img src="/spring06/upload/xxx.png" /> -->
+	</div>
+</body>
+</html>

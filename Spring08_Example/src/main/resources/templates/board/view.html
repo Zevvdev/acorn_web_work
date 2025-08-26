@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+	 xmlns:sec="https://www.thymeleaf.org/extras/spring-security">
+<head>
+<meta charset="UTF-8">
+<title>/board/view.html</title>
+<th:block th:insert="~{/include/resource :: bootstrap}"></th:block>
+<style>
+	/* 대댓글이 처음에는 보이지 않도록 하기 위해  */
+	.re-re{
+		display:none;
+	}
+</style>
+</head>
+<body>
+	<div class="container pt-2">
+		<nav>
+			 <ol class="breadcrumb">
+			   <li class="breadcrumb-item">
+			   <a th:href="@{/}">Home</a></li>
+			   <li class="breadcrumb-item">
+			   <a th:href="@{/board/list}">Board</a></li>
+			   <li class="breadcrumb-item active">Detail</li>
+			 </ol>
+		</nav>	
+		<h1>게시물 상세보기</h1>
+		<div class="btn-group mb-2">
+			<a class="btn btn-outline-secondary btn-sm" 
+				th:classappend="${dto.prevNum eq 0 ? 'disabled' : null}" 
+				th:href="@{/board/view(num=${dto.prevNum})}">
+				<i class="bi bi-arrow-left"></i>
+				Prev
+			</a>
+			<a class="btn btn-outline-secondary btn-sm" 
+				th:classappend="${dto.nextNum == 0 ? 'disabled' : ''}"
+				th:href="@{/board/view(num=${dto.nextNum})}">
+				<i class="bi bi-arrow-right"></i>
+				Next
+			</a>
+		</div>
+		
+		<table class="table table-striped">
+			<colgroup>
+				<col class="col-2" />
+				<col class="col" />
+			</colgroup>
+			<tr>
+				<th>글번호</th>
+				<td>[[${dto.num}]]</td>			
+			</tr>
+			<tr>
+				<th>작성자</th>
+				<td>
+					<i th:if="${dto.profileImage == null}" style="font-size:100px;" class="bi bi-person-circle"></i>
+					
+					<img th:unless="${dto.profileImage == null}" 
+						class="rounded-circle"
+						th:src="@{/upload/{name}(name=${dto.profileImage})}" 
+						style="width:100px;height:100px;border-radius:50%;"/>
+					[[${dto.writer}]]
+				</td>
+			</tr>
+			<tr>
+				<th>제목</th>
+				<th>[[${dto.title}]]</th>
+			</tr>
+			<tr>
+				<th>조회수</th>
+				<td>[[${dto.viewCount}]]</td>
+			</tr>
+			<tr>
+				<th>작성일</th>
+				<td>[[${dto.createdAt}]]</td>
+			</tr>
+		</table>
+		
+		<div class="card mt-4">
+		  <div class="card-header bg-light">
+		    <strong>본문 내용</strong>
+		  </div>
+		  <div class="card-body p-1">
+		    <!-- [(${dto.content})] -->
+		    <div th:utext="${dto.content}"></div>
+		  </div>
+		</div>		
+			<div th:if="${dto.writer == userName}" class="text-end pt-2">
+				<a th:href="@{/board/edit(num=${dto.num})}"
+					class="btn btn-warning btn-sm">Edit</a>
+				<a th:href="@{/board/delete(num=${dto.num})}"
+					class="btn btn-danger btn-sm">Delete</a>
+			</div>
+		
+		<div class="card my-3">
+		  <div class="card-header bg-primary text-white">
+		    댓글을 입력해 주세요
+		  </div>
+		  <div class="card-body">
+		    <!-- 원글의 댓글을 작성할 폼 -->
+		    <form th:action="@{/board/save-comment}" method="post">
+		      <!-- 숨겨진 입력값 -->
+		      <input type="hidden" name="parentNum" th:value="${dto.num}"/>
+		      <input type="hidden" name="targetWriter" th:value="${dto.writer}" />
+		
+		      <div class="mb-3">
+		        <label for="commentContent" class="form-label">댓글 내용</label>
+		        <textarea id="commentContent" name="content" rows="5" class="form-control" placeholder="댓글을 입력하세요"></textarea>
+		      </div>
+		
+		      <button type="submit" class="btn btn-success">등록</button>
+		    </form>
+		  </div>
+		</div>
+		
+		<!-- 댓글 목록 출력하기 -->
+		<div class="comments">
+			
+			<!-- 대댓글은 자신의 글번호와 댓글의 그룹번호가 다름->왼쪽 마진(들여쓰기) -->
+				<div th:each="tmp : ${commentList}" 
+					class="card mb-3"
+					th:classappend="${tmp.num == tmp.groupNum ? '' : 'ms-5 re-re'}">
+					
+					<div th:if="${tmp.deleted == 'yes'}" class="card-body">삭제된 댓글입니다.</div>
+						<div th:unless="${tmp.deleted == 'yes'}" class="card-body d-flex flex-column flex-sm-row position-relative">
+							
+							<button th:if="${tmp.replyCount ne 0 and tmp.num eq tmp.groupNum}"
+		            		 	class="dropdown-btn btn btn-outline-secondary btn-sm position-absolute"
+		            			style="bottom:16px; right:16px;">
+		            			<i class="bi bi-caret-down"></i>
+		            			답글 [[${tmp.replyCount}]] 개
+	            			</button>
+							
+	            			<i th:if="${tmp.num ne tmp.groupNum}"
+	            			 	class="bi bi-arrow-return-right position-absolute" 
+	            				style="top:0;left:-30px"
+	            				></i>
+		            		
+			            	<!-- 댓글 작성자가 로그인된 userName일 경우 삭제버튼 출력 -->
+			            	<button th:if="${tmp.writer == userName}"
+			            		th:attr="data-num=${tmp.num}"
+			            		class="btn-close position-absolute top-0 end-0 m-2"></button>
+			            	
+			            	<!-- 프로필 -->		            		
+			            	<i th:if="${tmp.profileImage == null}"
+	            				style="font-size:50px;" 
+	            				class="bi me-3 align-self-center bi-person-circle"></i>
+			            	<img th:unless="${tmp.profileImage == null}"
+		            			class="rounded-circle me-3 align-self-center" 
+			                	th:src="@{/upload/{name}(name=${tmp.profileImage})}" 
+			                	alt="프로필 이미지" 
+			                	style="width:50px; height:50px;">
+			                	                
+			                <div class="flex-grow-1">
+			                    <div class="d-flex justify-content-between">
+			                        <div>
+			                            <strong th:text="${tmp.writer}"></strong>
+			                            <span>[[${tmp.targetWriter}]]</span>
+			                        </div>
+			                        <small class="text-muted" th:text="${tmp.createdAt}"></small>
+		                    	</div>
+		                    	
+		                    	<pre th:text="${tmp.content}"></pre>
+		                    	
+		                    	<!-- 댓글 작성자가 로그인된 userName이라면 수정폼 / 아니면 댓글폼 -->
+		                    	<th:block th:if="${tmp.writer eq userName}">
+		                    		<!-- 수정 버튼 (본인에게만 보임) -->
+				                    <button class="btn btn-sm btn-outline-secondary edit-btn">수정</button>
+				
+				                    <!-- 댓글 수정 폼 (처음에는 숨김) -->
+				                    <div class="d-none form-div">
+				                        <form th:action="@{/board/comment-update}" method="post">
+					                        <!-- 댓글을 수정하기 위한 댓글의 번호, 이 페이지로 다시 돌아오기 위한 parentNum 같이 전송 -->
+					                        <input type="hidden" name="num" th:value="${dto.num}"/>
+					                        <input type="hidden" name="parentNum" th:value="${dto.num}"/>
+				                            <textarea name="content" class="form-control mb-2" rows="2" >[[${tmp.content}]]</textarea>
+				                            <button type="submit" class="btn btn-sm btn-success">수정 완료</button>
+				                            <button type="reset" class="btn btn-sm btn-secondary cancel-edit-btn">취소</button>
+			                        	</form>
+	                    			</div>	
+		                    	</th:block>
+		                    	<th:block th:unless="${tmp.writer eq userName}">		                    		
+			                    	<button class="btn btn-sm btn-outline-primary show-reply-btn">댓글</button>  
+		                   			<!-- 댓글 입력 폼 (처음에는 숨김) -->
+		                   			<div class="d-none form-div">
+		                       			<form th:action="@{/board/save-comment}" method="post">
+		                       				<!-- 원글의 글 번호, 댓글대상자, 댓글 그룹번호 -->
+		                       				<input type="hidden" name="parentNum" th:value="${dto.num}" />
+		                       				<input type="hidden" name="targetWriter" th:value="${tmp.writer}" />
+		                       				<input type="hidden" name="groupNum" th:value="${tmp.groupNum}" />
+		                           			<textarea name="content" class="form-control mb-2" rows="2" placeholder="댓글을 입력하세요..."></textarea>
+		                           			<button type="submit" class="btn btn-sm btn-success">등록</button>
+		                           			<button type="reset" class="btn btn-sm btn-secondary cancel-reply-btn">취소</button>
+		                           		</form>
+		                    		</div>                    		
+		                    	</th:block>
+		                    	
+	                    	</div>
+                 		</div> <!-- card body -->
+               	</div> <!-- card -->
+		</div> <!-- comments -->
+	</div><!-- .container -->
+	
+
+	<script>
+		//로그인 여부
+		const isLogin = [[${isLogin}]];
+		
+		
+		//대댓글 보기 버튼을 눌렀을때 실행할 함수 등록 
+    	document.querySelectorAll(".dropdown-btn").forEach(item => {
+     		item.addEventListener("click", (e) => {
+   				//click 이벤트가 발생한 그 버튼의 자손요소 중에서 caret up 또는 caret down 요소를 찾는다
+    			const caret = item.querySelector(".bi-caret-up, .bi-caret-down");
+   				// caret 모양을 위 아래로 토글 시킨다 	
+    			caret.classList.toggle("bi-caret-down");
+    			caret.classList.toggle("bi-caret-up");
+    			
+    		    // 1. 버튼(item)의 두 단계 부모 요소로 이동
+    		    const grandParent = item.parentElement.parentElement;
+				// 2. 두단계 부모요소의 바로 다음 형제 요소의 참조값을 얻어낸다 
+    		 	let next = grandParent.nextElementSibling;
+				// 3. 반복문 돌면서 (다음 형제 요소가 있는 동안에 반복문 돌기)
+	  	   		while (next) {
+	  	   			//만일 re-re 클래스가 존재한다면 
+	  	   			if (next.classList.contains("re-re")) {
+	  	   				// d-block 클래스를 토글시켜서 보였다 숨겼다를 반복 시킨다
+		   		    	next.classList.toggle("d-block");
+		   		  	}else{//존재하지 않으면 
+		   		  		//반복문 탈출 
+		   		  		break;
+		   		  	}
+	  	   			//다음 형제 요소의 참조값 얻어내기  
+		   		  	next = next.nextElementSibling;
+	  	   		}
+     		  });
+      	});
+		
+		//삭제 버튼을 눌렀을 때
+		document.querySelectorAll(".btn-close").forEach(item=>{
+			item.addEventListener("click", ()=>{
+				//data-num 속성에 출력된 삭제할 댓글의 번호
+				const num=item.getAttribute("data-num");
+				const isDelete=confirm(num+"번 댓글을 삭제하시겠습니까?");
+				if(isDelete){
+					location.href=`[[@{/board/comment-delete}]]?num=${num}&parentNum=[[${dto.num}]]`;
+				}
+			})
+		})
+		//수정
+        //클래스명이 edit-btn 인 모든 버튼에 "click" 이벤트리스너
+        document.querySelectorAll(".edit-btn").forEach(item=>{
+            item.addEventListener("click", ()=>{
+                //클릭한 버튼의 다음 형제요소의 class 목록에서 d-none 을 제거 
+                item.nextElementSibling.classList.remove("d-none");
+                //클릭한 버튼의 class 목록에 d-none 을 추가
+                item.classList.add("d-none");
+            });
+        });
+        //취소 버튼 - 이벤트리스너
+        document.querySelectorAll(".cancel-edit-btn").forEach(item=>{
+            item.addEventListener("click",()=>{
+                //가장 가까운 부모 요소중에 클래스 속성이 form-div 인요소  
+                const formDiv=item.closest(".form-div");
+                //formDiv 에 d-none 클래스 추가해서 안보이게 하고
+                formDiv.classList.add("d-none");
+                //formDiv 의 이전 형제요소(댓글버튼)에 d-none 클래스 제거해서 보이게 한다  
+                formDiv.previousElementSibling.classList.remove("d-none");
+            })
+        })
+        
+		document.querySelector("#commentContent").addEventListener("input", ()=>{
+			//원글의 댓글 입력란에 포커스 왔을 때 -- 로그인 x라면
+			if(!isLogin){
+				const isMove=confirm("댓글 작성을 위해 로그인이 필요합니다. 로그인 페이지로 이동하시겠습니까?");
+				location.href=
+					"[[@{/user/loginform}]]?url=[[@{/board/view(num=${dto.num})}]]";
+			}
+		})
+		
+        //모든 댓글 버튼에 이벤트 등록
+        document.querySelectorAll(".show-reply-btn").forEach(item=>{
+            // 매개변수에 전달된 item 은 댓글 button 의 참조값이다 
+            item.addEventListener("click", ()=>{
+            	//로그인 안했다면
+            	if(!isLogin){
+    				alert("댓글 작성을 위해 로그인이 필요합니다. 로그인 페이지로 이동하시겠습니까?");
+    				location.href=
+    					"[[@{/user/login}]]?url=[[@{/board/view(num=${dto.num})}]]";
+    				return;
+            	}
+                //클릭한 버튼의 다음 형제요소의 class 목록에서 d-none 을 제거 
+                item.nextElementSibling.classList.remove("d-none");
+                //클릭한 버튼의 class 목록에 d-none 을 추가
+                item.classList.add("d-none");
+            });
+        });
+
+        document.querySelectorAll(".cancel-reply-btn").forEach(item=>{
+            item.addEventListener("click", ()=>{
+                //가장 가까운 부모 요소중에 클래스 속성이 form-div 인요소  
+                const formDiv=item.closest(".form-div");
+                //formDiv 에 d-none 클래스 추가해서 안보이게 하고
+                formDiv.classList.add("d-none");
+                //formDiv 의 이전 형제요소(댓글버튼)에 d-none 클래스 제거해서 보이게 한다  
+                formDiv.previousElementSibling.classList.remove("d-none");
+            });
+        });
+    </script>
+</body>
+</html>

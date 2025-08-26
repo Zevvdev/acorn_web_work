@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+<meta charset="UTF-8">
+<title>/templates/home.html</title>
+<!--/*  
+	/include/resource.html 페이지 안에 있는 th:fragment가 bootstrap 이름의 조각을 여기에 insert
+*/-->
+<th:block th:insert="/include/resource :: bootstrap"></th:block>
+</head>
+<body>
+	<!--/* index 페이지에서 navbar를 include 했다는 의미에서 nav()에 'index'를 전달 */-->
+	<th:block th:insert="/include/navbar :: nav('index')"></th:block>
+	<div class="container">		
+		<h1>인덱스페이지</h1>
+		
+		<h2>공지사항</h2>
+		<ul>
+			<li th:each="tmp : ${notice}">[[${tmp}]]</li>
+		</ul>
+	</div>
+</body>
+</html>

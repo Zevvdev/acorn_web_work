@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>/templates/member/list.html</title>
+</head>
+<body>
+	<div class="container">
+		<a th:href="@{/member/new-form}">회원추가</a>
+		<table>
+			<thead>
+				<tr>
+					<th>번호</th>
+					<th>이름</th>
+					<th>주소</th>
+					<th>자세히</th>
+					<th>수정</th>
+					<th>삭제</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr th:each="tmp:${list}">
+					<td>[[${tmp.num}]]</td>
+					<td th:text="${tmp.name}"></td>
+					<td th:text="${tmp.addr}"></td>
+					<td>
+						<a th:href="@{/member/detail(num=${tmp.num})}">바로가기</a>
+					</td>
+					<td>
+						<a th:href="@{/member/edit(num=${tmp.num})}">수정</a>
+					</td>
+					<td>
+						<a th:href="@{/member/delete(num=${tmp.num})}">삭제</a>
+					</td>
+				</tr>
+			</tbody>
+		</table>
+		
+	</div>
+</body>
+</html>

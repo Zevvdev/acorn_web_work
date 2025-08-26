@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>/home.html</title>
+</head>
+<body>
+	<div class="container">
+		<h1>인덱스 페이지</h1>
+		<p>
+			오늘의 인물 : <strong>[[${personToday}]]</strong>
+			<br />
+			<img src="/spring05/images/Spain.png" alt="스페인 국가 이미지">
+			<img th:src="@{/images/Spain.png}" alt="스페인 국가이미지" />
+		</p>
+		<h2>공지사항</h2>
+		<ul>
+			<li th:each = "tmp : ${notice}">[[${tmp}]]</li>
+		</ul>
+		<h3>Thymeleaf 연습</h3>
+		<ul>
+			<li><a th:href="@{/member/detail}">회원정보</a></li>
+			<li><a th:href="@{/member/list}">회원목록</a></li>
+			<li><a th:href="@{/if}">조건부 렌더링</a></li>
+			<li><a th:href="@{/form}">form Test</a></li>
+			<li><a th:href="@{/include-test}">include Test</a></li>
+			<li><a th:href="@{/print-num}">반복문 돌면서 숫자 출력</a></li>
+			<li><a th:href="@{/unescape}">unescape Test</a></li>
+			<li><a th:href="@{/javascript}">javascript 출력</a></li>
+		</ul>
+	</div>
+</body>
+</html>

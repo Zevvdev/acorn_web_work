@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>/templates/user/signup.html</title>
+</head>
+<body>
+	<div class="container">
+		<h3>알림</h3>
+		<p>
+			<strong>[[${param.userName}]]</strong>님 회원가입 완료!
+			<a th:href="@{/user/loginform}">로그인하러가기</a>
+		</p>
+		
+	</div>
+</body>
+</html>
