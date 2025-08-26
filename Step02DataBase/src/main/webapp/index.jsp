@@ -25,6 +25,9 @@
 			<li><a href="${pageContext.request.contextPath }/board/list.jsp">게시글 목록</a></li>	
 			<li><a href="${pageContext.request.contextPath }/admin/index.jsp">관리자</a></li>	
 			<li><a href="${pageContext.request.contextPath }/staff/index.jsp">직원</a></li>	
+			<li><a href="${pageContext.request.contextPath }/test/file-form.jsp">파일 업로드 테스트</a></li>	
+			<li><a href="${pageContext.request.contextPath }/jstl/hello.jsp">hello.jstl</a></li>	
+			<li><a href="${pageContext.request.contextPath }/jstl/test01.jsp">test01.jstl</a></li>	
 		</ul>
 		<div id="carouselExampleIndicators" class="carousel slide" data-bs-ride="carousel">
 		  <div class="carousel-indicators">

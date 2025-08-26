@@ -154,7 +154,7 @@
 						<td><a href="javascript:" class="deleteLink" data-num="<%=tmp.getNum()%>">삭제</a></td>
 					</tr>
 				<%} %>
-				 
+				
 				
 			</tbody>
 		</table>

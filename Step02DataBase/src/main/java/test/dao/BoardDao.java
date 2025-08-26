@@ -142,62 +142,63 @@ public class BoardDao {
 	}
 	
 	//특정 page와 keyword에 해당하는 row만 select해서 리턴하는 메소드
-		//BoardDto 객체에 startRowNum 과 endRowNum을 담아와서 select
-		public List<BoardDto> selectPageByKeyword(BoardDto dto){
-			List<BoardDto> list=new ArrayList<BoardDto>();
-			
-			//필요한 객체를 담을 지역변수
-			Connection conn = null;
-			PreparedStatement pstmt = null;			ResultSet rs = null;
-			
-			try {
-				conn = new DbcpBean().getConn();
-				//실행할 sql문
-				String sql = """
-							SELECT *
+	//BoardDto 객체에 startRowNum 과 endRowNum을 담아와서 select
+	public List<BoardDto> selectPageByKeyword(BoardDto dto){
+		List<BoardDto> list=new ArrayList<BoardDto>();
+		
+		//필요한 객체를 담을 지역변수
+		Connection conn = null;
+		PreparedStatement pstmt = null;			
+		ResultSet rs = null;
+		
+		try {
+			conn = new DbcpBean().getConn();
+			//실행할 sql문
+			String sql = """
+						SELECT *
+						FROM
+							(SELECT result1.*, ROWNUM AS rnum
 							FROM
-								(SELECT result1.*, ROWNUM AS rnum
-								FROM
-									(SELECT num, writer, title, viewCount, createdAt
-									FROM board
-									WHERE title LIKE '%'||?||'%' OR content LIKE '%'||?||'%'
-									ORDER BY num DESC) result1)
-							WHERE rnum BETWEEN ? AND ?
-						""";
-				pstmt = conn.prepareStatement(sql);
-				//? 에 값 바인딩
-				pstmt.setString(1, dto.getKeyword());
-				pstmt.setString(2, dto.getKeyword());
-				pstmt.setInt(3, dto.getStartRowNum());
-				pstmt.setInt(4, dto.getEndRowNum());
-				// select 문 실행하고 결과를 ResultSet 으로 받아온다
-				rs = pstmt.executeQuery();
-				//반복문 돌면서 ResultSet 에 담긴 데이터를 추출해서 리턴해줄 객체에 담는다
-				while (rs.next()) {
-					BoardDto dto2=new BoardDto();
-					dto2.setNum(rs.getInt("num"));
-					dto2.setWriter(rs.getString("writer"));
-					dto2.setTitle(rs.getString("title"));
-					dto2.setViewCount(rs.getInt("viewCount"));
-					dto2.setCreatedAt(rs.getString("createdAt"));
-					
-					list.add(dto2);
-				}
-			} catch (Exception e) {
-				e.printStackTrace();
-			} finally {
-				try {
-					if (rs != null)
-						rs.close();
-					if (pstmt != null)
-						pstmt.close();
-					if (conn != null)
-						conn.close();
-				} catch (Exception e) {
-				}
+								(SELECT num, writer, title, viewCount, createdAt
+								FROM board
+								WHERE title LIKE '%'||?||'%' OR content LIKE '%'||?||'%'
+								ORDER BY num DESC) result1)
+						WHERE rnum BETWEEN ? AND ?
+					""";
+			pstmt = conn.prepareStatement(sql);
+			//? 에 값 바인딩
+			pstmt.setString(1, dto.getKeyword());
+			pstmt.setString(2, dto.getKeyword());
+			pstmt.setInt(3, dto.getStartRowNum());
+			pstmt.setInt(4, dto.getEndRowNum());
+			// select 문 실행하고 결과를 ResultSet 으로 받아온다
+			rs = pstmt.executeQuery();
+			//반복문 돌면서 ResultSet 에 담긴 데이터를 추출해서 리턴해줄 객체에 담는다
+			while (rs.next()) {
+				BoardDto dto2=new BoardDto();
+				dto2.setNum(rs.getInt("num"));
+				dto2.setWriter(rs.getString("writer"));
+				dto2.setTitle(rs.getString("title"));
+				dto2.setViewCount(rs.getInt("viewCount"));
+				dto2.setCreatedAt(rs.getString("createdAt"));
+				
+				list.add(dto2);
 			}
-			return list;
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			try {
+				if (rs != null)
+					rs.close();
+				if (pstmt != null)
+					pstmt.close();
+				if (conn != null)
+					conn.close();
+			} catch (Exception e) {
+			}
 		}
+		return list;
+	}
 		
 	//특정 page에 해당하는 row만 select해서 리턴하는 메소드
 	//BoardDto 객체에 startRowNum 과 endRowNum을 담아와서 select
@@ -356,7 +357,7 @@ public class BoardDao {
 			pstmt = conn.prepareStatement(sql);
 			//? 에 값 바인딩
 
-			// select 문 실행하고 결과를 ResultSet 으로 받아온다
+			// select 문 실행하고 결과를 ResultSe 으로 받아온다
 			rs = pstmt.executeQuery();
 			//반복문 돌면서 ResultSet 에 담긴 데이터를 추출해서 리턴해줄 객체에 담는다
 			while (rs.next()) {

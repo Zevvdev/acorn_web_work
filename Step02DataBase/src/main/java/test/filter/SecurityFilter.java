@@ -25,10 +25,14 @@ public class SecurityFilter implements Filter{
 			"/index.jsp",
 			"/user/loginform.jsp","/user/login.jsp",
 			"/user/signup-form.jsp","/user/signup.jsp",
+			"/user/check-id.jsp",
 			"/images/",
 			"/upload/",
 			"/board/list.jsp",
-			"/board/view.jsp"
+			"/board/view.jsp",
+			"/test/",
+			"/gallery/list",
+			"/gallery/view"
 	);
 	
 	
@@ -92,6 +96,9 @@ public class SecurityFilter implements Filter{
 	//화이트리스트 검사
 	private boolean isWhiteList(String path) {
 		if("/".equals(path)) return true;
+		
+		//error 페이지
+		if(path.startsWith("/error")) return true;
 		
 		for(String prefix:whiteList) {
 			if(path.startsWith(prefix)) {

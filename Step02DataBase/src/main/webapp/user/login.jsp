@@ -42,7 +42,33 @@
 		session.setMaxInactiveInterval(180*60); //기본값: 30분
 	}
 		
-			
+	// 체크박스 체크 상태로 버튼 누르면 null이 아님 (체크 X = null)
+	String isSave=request.getParameter("isSave");
+	if(isSave != null){
+		// 입력한 아이디 비밀번호를 쿠키로 응답하고 1주일동안 유지
+		Cookie cook1=new Cookie("saveUserName", userName);
+		Cookie cook2=new Cookie("saveUserPassword", password);
+		// 쿠키 유지시간 초 단위 설정
+		cook1.setMaxAge(60*60*24*7);
+		cook2.setMaxAge(60*60*24*7);
+		// 쿠키 경로
+		//cook1.setPath("/"); // 모든 경로에서 사용할 수 있는 쿠키
+		//cook1.setPath("/user/"); // user 경로에서만 사용할 수 있는 쿠키
+		// 설정하지 않으면 현재 경로에서만 사용할 수 있음
+		
+		//HttpServletResponse 객체에 Cookie 객체를 담으면 응답할 떄 알아서 쿠키가 응답
+		response.addCookie(cook1);
+		response.addCookie(cook2);
+	}else{ // 체크박스 체크 X -> 쿠키 삭제
+		// 특정 키값으로 저장된 쿠키값 삭제 (value 에는 아무 값이나 넣어도 상관없음)
+		Cookie cook1=new Cookie("savedUserName", "");
+		Cookie cook2=new Cookie("savedUserPassword", null);
+		// 쿠키 유저시간을 0으로 설정해서 응답하면 쿠키가 삭제됨
+		cook1.setMaxAge(0);
+		cook2.setMaxAge(0);
+		response.addCookie(cook1);
+		response.addCookie(cook2);
+	}
 %>    
     
     

@@ -92,5 +92,5 @@ public class UserUpdateServlet extends HttpServlet{
 		//리다일렉트 응답
 		String cPath=req.getContextPath();
 		resp.sendRedirect(cPath+"/user/info.jsp");
-	}
-}
+	} //method
+} //class
