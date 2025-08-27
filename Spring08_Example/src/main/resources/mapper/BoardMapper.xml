@@ -1,6 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="board">
+
+	<sql id="search">
+		<choose>
+			<when test="search == 'writer'">
+				WHERE writer LIKE '%' || #{keyword} || '%'
+			</when>
+			<when test="search == 'title'">
+				WHERE title LIKE '%' || #{keyword} || '%'
+			</when>
+			<when test="search == 'title_content'">
+				WHERE title LIKE '%' || #{keyword} || '%' OR content LIKE '%' || #{keyword} || '%' 
+			</when>
+		</choose>	
+	</sql>
 	<!-- 
 		application.properties 파일에 
 		mybatis.type-alisases-package=com.example.spring08**
@@ -16,49 +30,22 @@
 				(SELECT num, writer, title, viewCount, createdAt
 				FROM board
 				
-				
-				<choose>
-					<when test="search == 'writer'">
-						WHERE writer LIKE '%' || #{keyword} || '%'
-					</when>
-					<when test="search == 'title'">
-						WHERE title LIKE '%' || #{keyword} || '%'
-					</when>
-					<when test="search == 'title_content'">
-						WHERE title LIKE '%' || #{keyword} || '%' OR content LIKE '%' || #{keyword} || '%' 
-					</when>
-				</choose>				
-				ORDER BY num DESC
-				) result1)
+				<include refid="search"/>
+							
+				ORDER BY num DESC) result1)
 		WHERE rnum BETWEEN #{startRowNum} AND #{endRowNum}
 	</select>
-	
-	
+
 	
 	<select id="getCount" parameterType="boardDto" resultType="int">
 		
 		SELECT NVL(MAX(ROWNUM), 0) AS count
 		FROM board
-		<choose>
-			<when test="search == 'writer'">
-				WHERE writer LIKE '%' || #{keyword} || '%'
-			</when>
-			<when test="search == 'title'">
-				WHERE title LIKE '%' || #{keyword} || '%'
-			</when>
-			<when test="search == 'title_content'">
-				WHERE title LIKE '%' || #{keyword} || '%' OR content LIKE '%' || #{keyword} || '%' 
-			</when>
-		</choose>	
+		<include refid="search"/>
 		
 	</select>
 	 
-	<select id="getCountByKeyword" parameterType="string" resultType="int">
-		
-		SELECT NVL(MAX(ROWNUM), 0) AS count
-		FROM board
-		WHERE title LIKE '%'||#{keyword}||'%' OR content LIKE '%'||#{keyword}||'%'
-	</select>
+
 	<!-- 
 		아래와 같이 insert를 구성하면
 		1. insert 문이 실행되기 전에 시퀀스 값을 미리 읽어와서
@@ -88,5 +75,31 @@
 		WHERE num=#{num}
 	</select>
 	
+	<select id="getByDto" parameterType="boardDto" resultType="boardDto">
+		SELECT *
+		FROM	
+			(SELECT b.num, writer, title, content, viewCount, 
+				TO_CHAR(b.createdAt, 'YY"년" MM"월" DD"일" HH24:MI') AS createdAt, 
+				profileImage,
+				LAG(b.num, 1, 0) OVER (ORDER BY b.num DESC) AS prevNum,
+				LEAD(b.num, 1, 0) OVER (ORDER BY b.num DESC) AS nextNum
+			FROM board b
+			INNER JOIN users u ON b.writer = u.userName
+			<include refid="search"/>
+			) 
+			
+		WHERE num=#{num} <!-- 파라미터타입이 dto 값 여러개인 경우 꼭 필드명 써야 함 -->
+	</select>
+	
+	<delete id="delete" parameterType="int">
+		DELETE FROM board
+		WHERE num=#{num} <!-- 파라미터타입이 숫자나 문자 값 하나인 경우 아무렇게나 써도 됨 -->
+	</delete>
+	
+	<update id="update" parameterType="boardDto">
+		UPDATE board
+		SET title=#{title}, content=#{content}
+		WHERE num=#{num}
+	</update>
 	
 </mapper>

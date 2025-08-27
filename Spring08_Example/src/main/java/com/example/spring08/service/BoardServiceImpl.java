@@ -10,9 +10,6 @@ import com.example.spring08.dto.BoardListResponse;
 import com.example.spring08.dto.CommentDto;
 import com.example.spring08.repository.BoardDao;
 import com.example.spring08.repository.CommentDao;
-
-import ch.qos.logback.core.util.StringUtil;
-import io.micrometer.common.util.StringUtils;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -57,10 +54,16 @@ public class BoardServiceImpl implements BoardService{
 			
 			//글 목록 (검색 키워드가 있다면 그 목록)
 			List<BoardDto> list=boardDao.selectPage(dto);
-
+			
+			/*
+			 * query 문자열을 미리 구성해서 view page에 전달하도록 한다
+			 * 
+			 * 검색 키워드가 없으면 query="" 빈문자열
+			 * 검색 키워드가 있으면 query="&search=검색조건&keyword=검색어" 형식의 문자열
+			 */
 			String query="";
 			if(dto.getKeyword() != null) {
-				query="search="+dto.getSearch()+"&keyword="+dto.getKeyword();
+				query="&search="+dto.getSearch()+"&keyword="+dto.getKeyword();
 			}
 			
 			//한줄  coding  으로 BoardListResponse 객체를 만들어서 리턴하기
@@ -84,9 +87,9 @@ public class BoardServiceImpl implements BoardService{
 		}
 		
 		@Override
-		public BoardDto getDetail(int num) {
+		public BoardDto getDetail(BoardDto dto) {
 			
-			return boardDao.getByNum(num);
+			return boardDao.getByDto(dto);
 		}
 		
 		@Override
@@ -136,6 +139,43 @@ public class BoardServiceImpl implements BoardService{
 			
 			commentDao.delete(num);
 		
+		}
+
+		@Override
+		public void deleteContent(int num) {
+			//글 작성자와 로그인된 userName이 동일한지 비교, 다르면 예외발생
+			String writer = boardDao.getByNum(num).getWriter();
+			String userName = SecurityContextHolder.getContext().getAuthentication().getName();
+			if (!writer.equals(userName)) {
+				throw new RuntimeException("작성자만 삭제할 수 있습니다!");
+			}
+			//삭제된 row 갯수 리턴받는다. 정상:1 / 실패:0 리턴
+			int rowCount = boardDao.delete(num);
+			if(rowCount == 0) {
+				throw new RuntimeException("삭제 실패");
+			}
+		}
+
+		@Override
+		public BoardDto getData(int num) {
+			
+			return boardDao.getByNum(num);
+		}
+
+		@Override
+		public void updateContent(BoardDto dto) {
+			
+			String writer = boardDao.getByNum(dto.getNum()).getWriter();
+			String userName = SecurityContextHolder.getContext().getAuthentication().getName();
+			if (!writer.equals(userName)) {
+				throw new RuntimeException("작성자만 삭제할 수 있습니다!");
+			}
+			
+			//삭제된 row 갯수 리턴받는다. 정상:1 / 실패:0 리턴
+			int rowCount = boardDao.update(dto);
+			if(rowCount == 0) {
+				throw new RuntimeException("수정 실패");
+			}
 		}
 	
 		

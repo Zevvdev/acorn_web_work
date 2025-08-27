@@ -18,7 +18,7 @@
 			<div class="col-md-6 ms-auto">
 				<form th:action="@{/board/list}" method="get">
 					<div class="input-group">
-						<select name="" class="form-select">
+						<select name="search" class="form-select">
 							<option th:selected="${dto.search eq 'title_writer'}" value="title_content">제목+내용</option>
 							<option th:selected="${dto.search eq 'title'}" value="title">제목</option>
 							<option th:selected="${dto.search eq 'writer'}" value="writer">작성자</option>
@@ -28,7 +28,17 @@
 							name="keyword" 
 							class="form-control" 
 							placeholder="검색어 입력.." />
-						<button type="submit" class="btn btn-outline-secondary">검색</button>
+							
+						<button type="submit" class="btn btn-outline-secondary">
+							<i class="bi bi-search"></i>
+							<span class="visually-hidden">검색</span>
+						</button>
+						
+						<a class="btn btn-outline-success" th:href="@{/board/list}">
+							<i class="bi bi-arrow-clockwise"></i>
+							<span class="visually-hidden">새로고침</span>
+						</a>
+						
 					</div>
 				</form>
 				
@@ -53,7 +63,7 @@
 					<td>[[${tmp.num}]]</td>
 					<td>[[${tmp.writer}]]</td>
 					<td>
-						<a th:href="@{/board/view(num=${tmp.num})}">[[${tmp.title}]]</a>
+						<a th:href="@{|/board/view?num=${tmp.num}${dto.query}|}">[[${tmp.title}]]</a>
 					</td>
 					<td th:text="${tmp.viewCount}"></td>
 					<td th:text="${tmp.createdAt}"></td>
@@ -61,24 +71,28 @@
 					<td>
 						<a th:href="@{/board/edit(num=${tmp.num})}">수정</a></td>
 					<td>
-						<a href="javascript:" class="deleteLink" data-num="${tmp.num}">삭제</a>
+						<a th:href="@{/board/delete(num=${tmp.num})}" class="deleteLink" data-num="${tmp.num}">삭제</a>
 					</td>
 				</tr>
 			</tbody>
 		</table>
 		
 		<ul class="pagination">
-			
+			<!--/*
+				@{'/board/list?pageNum='+${dto.startPageNum-1}+${dto.query}}
+				위와 같이 작성하거나 혹은 문자열을 이어붙일 때는 아래와 같이 하면 더 간편
+				@{|/board/list?pageNum=${dto.startPageNum-1}${dto.query}|}
+			*/-->
 			<li th:if="${dto.startPageNum ne 1}" class="page-item">
-					<a class="page-link" th:href="@{/board/list(num=${dto.startPageNum-1}, keyword=${dto.keyword})}">&lsaquo;</a>
+				<a class="page-link" th:href="@{|/board/list?pageNum=${dto.startPageNum-1}${dto.keyword}|}">&lsaquo;</a>
 			</li>
 			
 			<li th:each="i : ${#numbers.sequence(dto.startPageNum, dto.endPageNum)}" class="page-item">
 				<a class="page-link" th:classappend="${i eq dto.pageNum ? 'active':null}" 
-					th:href="@{/board/list(pageNum=${i}, keyword=${dto.keyword})}">[[${i}]]</a>
+					th:href="@{|/board/list?pageNum=${i}${dto.query}|}">[[${i}]]</a>
 			</li>
 				<li th:if="${dto.endPageNum lt dto.totalPageCount}" class="page-item">
-					<a class="page-link" th:href="@{/board/list(pageNum=${dto.endPageNum+1},keyword=${dto.keyword})}">&rsaquo;</a>
+					<a class="page-link" th:href="@{|/board/list?pageNum=${dto.endPageNum+1}${dto.query}|}">&rsaquo;</a>
 				</li>
 		
 		</ul>

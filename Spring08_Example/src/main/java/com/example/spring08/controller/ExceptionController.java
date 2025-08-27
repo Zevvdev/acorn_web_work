@@ -1,9 +1,11 @@
 package com.example.spring08.controller;
 
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import com.example.spring08.Exception.MemberException;
 import com.example.spring08.Exception.PasswordException;
 
 //예외 컨트롤러는 @ControllerAdvice 를 붙여 bean으로 만든다
@@ -24,6 +26,15 @@ public class ExceptionController {
 		ra.addFlashAttribute("exception", pe);
 		
 		return "redirect:/user/edit-password";
+	}
+	
+	@ExceptionHandler(MemberException.class)
+	public String memberException(MemberException me, Model model) {
+		model.addAttribute("title", "Member 관련 작업 중에 에러가 발생했습니다");
+		model.addAttribute("message", me.getMessage());
+		model.addAttribute("reason", me.reason.name());
+		
+		return "error/member-exception";
 	}
 
 }

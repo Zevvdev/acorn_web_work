@@ -2,15 +2,12 @@
 <html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
 <meta charset="UTF-8">
-<title>/board/save.html</title>
+<title>/board/delete.html</title>
 </head>
 <body>
-	<div class="container">
-		<script>
-			alert("저장완료");
-			location.href="[[@{/board/view(num=${dto.num})}]]";
+	<script>
+		alert("[[${param.num}]] 번 글을 삭제했습니다.")
+		location.href="[[@{/board/list}]]"
 	</script>
-	</div>
-	
 </body>
 </html>

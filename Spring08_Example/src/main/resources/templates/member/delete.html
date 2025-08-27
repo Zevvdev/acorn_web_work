@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+</head>
+<body>
+	<!--/*  
+		<script>
+			alert("[[${param.num}]] 번 회원의 정보를 삭제 했습니다");
+			location.href="[[@{/member/list}]]";
+		</script>
+		
+		위와 동일한 동작을 아래 처럼 할수도 있다 (th:inline="javascript" 이용)
+	*/-->
+	<script th:inline="javascript">
+		alert( [[${param.num}]] + "번 회원의 정보를 삭제했습니다.");
+		location.href=[[@{/member/list}]];
+	</script>
+	
+</body>
+</html>

@@ -24,19 +24,39 @@
 			 </ol>
 		</nav>	
 		<h1>게시물 상세보기</h1>
-		<div class="btn-group mb-2">
-			<a class="btn btn-outline-secondary btn-sm" 
-				th:classappend="${dto.prevNum eq 0 ? 'disabled' : null}" 
-				th:href="@{/board/view(num=${dto.prevNum})}">
-				<i class="bi bi-arrow-left"></i>
-				Prev
-			</a>
-			<a class="btn btn-outline-secondary btn-sm" 
-				th:classappend="${dto.nextNum == 0 ? 'disabled' : ''}"
-				th:href="@{/board/view(num=${dto.nextNum})}">
-				<i class="bi bi-arrow-right"></i>
-				Next
-			</a>
+		<!--/*  
+			th:if="${message !== null}"
+			th:if="${!#strings.isEmpty(message)}"
+			아래 방법까지 모두 가능
+		*/-->
+		<p th:if="${message}" class="alert alert-success p-3">[[${message}]]</p>
+		
+		<!--/*
+			Thymeleaf view page에서 요청 파라미터로 전달되었던 값도 추출 할 수 있따
+			${param.파라미터명}
+			${#strings } 는 문자열에 관련된 유틸리티 객체를 활용할 수 있다.
+			${#strings.isEmpty(param.search)} 는 search라는 파라미터명으로 전달된 값이 있는지 확인한다.
+		*/-->
+		<p th:if="${!#strings.isEmpty(param.search)}">
+			<strong>[[${param.search}]]</strong> 조건
+			<strong>[[${param.keyword}]]</strong> 검색결과입니다.
+		</p>
+		
+		<div class="d-flex justify-content-end mb-2">
+			<div class="btn-group mb-2">
+				<a class="btn btn-outline-secondary btn-sm" 
+					th:classappend="${dto.prevNum eq 0 ? 'disabled' : null}" 
+					th:href="@{|/board/view?num=${dto.prevNum}${query}|}">
+					<i class="bi bi-arrow-left"></i>
+					Prev
+				</a>
+				<a class="btn btn-outline-secondary btn-sm" 
+					th:classappend="${dto.nextNum == 0 ? 'disabled' : ''}"
+					th:href="@{|/board/view?num=${dto.nextNum}${query}|}">
+					<i class="bi bi-arrow-right"></i>
+					Next
+				</a>
+			</div>
 		</div>
 		
 		<table class="table table-striped">
@@ -203,7 +223,7 @@
 	<script>
 		//로그인 여부
 		const isLogin = [[${isLogin}]];
-		
+		console.log(isLogin);
 		
 		//대댓글 보기 버튼을 눌렀을때 실행할 함수 등록 
     	document.querySelectorAll(".dropdown-btn").forEach(item => {

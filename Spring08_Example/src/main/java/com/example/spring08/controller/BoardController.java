@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.example.spring08.dto.BoardDto;
 import com.example.spring08.dto.BoardListResponse;
@@ -49,11 +50,49 @@ public class BoardController {
 		
 	}
 	
+	@PostMapping("/board/update")
+	public String boardUpdate(BoardDto dto, RedirectAttributes ra) {
+		//글 수정 반영하고
+		service.updateContent(dto);
+		//리다일렉트 이동해서 출력할 메시지도 담는다.
+		ra.addFlashAttribute("message", "게시글을 성공적으로 수정했습니다");
+		//글 자세히 보기로 리다일렉트
+		return "redirect:/board/view?num="+dto.getNum();
+	}
+	
+	@GetMapping("/board/edit")
+	public String boardEdit(int num, Model model) {
+		model.addAttribute("dto", service.getData(num));
+		return "board/edit";
+	}
+	
+	@GetMapping("/board/delete")
+	public String boardDelete(int num) {
+		
+		service.deleteContent(num);
+		return "board/delete";
+	}
+	
+	
 	@GetMapping("/board/view")
-	public String boardView(int num, Model model) {
+	public String boardView(BoardDto requestDto, Model model) {
+		/*
+		 * requestDto 에는 자세히 보여줄 글의
+		 * num, search (검색조건), keyword(검색어)가 들어있을 수 있다.
+		 * 검색어가 없을 경우 search와 keyword 는 null
+		 */
 		//서비스를 이용해서 응답에 필요한 데이터를 얻어내서
-		BoardDto dto=service.getDetail(num);
-		List<CommentDto> comments=service.getComments(num);
+		BoardDto dto=service.getDetail(requestDto);
+		
+		String query="";
+		if(dto.getKeyword() != null) {
+			query="&search="+requestDto.getSearch()+"&keyword="+requestDto.getKeyword();
+		}
+		
+		model.addAttribute("query", query);
+		
+		//댓글 목록은 원글의 글번호를 전달
+		List<CommentDto> comments=service.getComments(requestDto.getNum());
 		//모델 객체에 담고
 		model.addAttribute("dto", dto);
 		model.addAttribute("commentList", comments);
